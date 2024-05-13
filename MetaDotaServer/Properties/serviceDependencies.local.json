@@ -6,6 +6,10 @@
       "resourceId": null,
       "type": "mssql.local",
       "connectionId": "ConnectionStrings:UserContext"
+    },
+    "mssql2": {
+      "type": "mssql.local",
+      "connectionId": "ConnectionStrings:TokenContext"
     }
   }
 }
