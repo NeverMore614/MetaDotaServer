@@ -38,5 +38,20 @@ namespace MetaDotaServer.Entity
         //生成的视频地址
         public string GenerateUrl { get; set; }
 
+        public bool Request(string match)
+        {
+            RequestMatch = match;
+            return true;
+        }
+
+        public bool Pay()
+        {
+            if (MatchRequestState != MatchRequestState.Success || string.IsNullOrEmpty(GenerateUrl))
+                return false;
+
+            VideoUrl = GenerateUrl;
+            return true;
+        }
+
     }
 }

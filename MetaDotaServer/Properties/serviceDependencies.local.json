@@ -10,6 +10,10 @@
     "mssql2": {
       "type": "mssql.local",
       "connectionId": "ConnectionStrings:TokenContext"
+    },
+    "mssql3": {
+      "type": "mssql.local",
+      "connectionId": "ConnectionStrings:MetaDotaServerContext"
     }
   }
 }

@@ -54,7 +54,7 @@ namespace MetaDotaServer.Controllers
             public UserInfo UserInfo { get; set; }
         }
         [HttpGet]
-        public async Task<ActionResult<string>> Get(string token)
+        public async Task<ActionResult<AccountInfo>> Get(string token)
         {
             //验证登录token
             string accountId;
@@ -92,7 +92,7 @@ namespace MetaDotaServer.Controllers
                     
                 }
                 string jwt = CreateToken(user.Id, expireTime);
-                return Ok(CreateAccount(jwt, user));
+                return Ok(CommonTool.CreateAccount(jwt, user));
 
             }
 
@@ -103,8 +103,6 @@ namespace MetaDotaServer.Controllers
         [Authorize]
         public async Task<ActionResult<string>> auth()
         {
-            
-            var user = HttpContext.User;
             var claim = (ClaimsIdentity)HttpContext.User.Identity;
             var Id = Convert.ToInt32(claim.Claims.Where(x => x.Type.Contains("id")).FirstOrDefault().Value);
             return Ok("你成功了！你的id是：" + Id);
@@ -156,22 +154,7 @@ namespace MetaDotaServer.Controllers
                 GenerateUrl = ""
             };
         }
-        private AccountInfo CreateAccount(string jwt, User user)
-        { 
-            UserInfo userInfo = new UserInfo();
-            userInfo.Name = user.Name;
-            userInfo.VideoUrl = user.VideoUrl;
-            userInfo.RequestMatch = user.RequestMatch;
-            userInfo.MatchState = user.MatchRequestState;
-            userInfo.message = user.ErrorMessage;
 
-            return new AccountInfo()
-            {
-                Vaild = true,
-                Jwt = jwt,
-                UserInfo = userInfo
-            };
-        }
 
     }
 }

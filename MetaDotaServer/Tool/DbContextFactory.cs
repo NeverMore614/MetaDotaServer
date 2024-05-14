@@ -1,5 +1,7 @@
 ﻿using MetaDotaServer.Data;
+using MetaDotaServer.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 
 namespace MetaDotaServer.Tool
@@ -28,6 +30,32 @@ namespace MetaDotaServer.Tool
            .Options;
 
             return new UserContext(options);
+        }
+
+        public async Task<User> GetUser(int id)
+        {
+            using (MetaDotaServer.Data.UserContext userContext = CreateUserDb())
+            {
+                return await userContext.User.FindAsync(id);
+            }
+        }
+
+        public async Task<bool> SaveUser(User user)
+        {
+            using (MetaDotaServer.Data.UserContext userContext = CreateUserDb())
+            {
+                userContext.User.Entry(user).State = EntityState.Modified;
+                try
+                {
+                    await userContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return false;
+                }
+                
+                return true;
+            }
         }
     }
 }

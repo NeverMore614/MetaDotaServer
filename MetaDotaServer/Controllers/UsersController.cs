@@ -7,6 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MetaDotaServer.Data;
 using MetaDotaServer.Entity;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using MetaDotaServer.Tool;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Identity.Client;
+using NuGet.Common;
 
 namespace MetaDotaServer.Controllers
 {
@@ -14,95 +20,94 @@ namespace MetaDotaServer.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly UserContext _context;
 
-        public UsersController(UserContext context)
+        private readonly DbContextFactory _contextFactory;
+        public UsersController(DbContextFactory contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
-        // GET: api/Users
+
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUser()
+        [Authorize]
+        public async Task<ActionResult<LoginController.AccountInfo>> Get()
         {
-            return await _context.User.ToListAsync();
-        }
+            int id = 0;
+            if  (!CommonTool.GetID(HttpContext, ref id))
+                return Unauthorized();
 
-        // GET: api/Users/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
-        {
-            var user = await _context.User.FindAsync(id);
-
+            User user = await _contextFactory.GetUser(id);
             if (user == null)
             {
-                return NotFound();
+                return NotFound("User Not Found");
             }
 
-            return user;
+            return Ok(CommonTool.CreateAccount("", user));
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+
+        [HttpGet("RequestMatch")]
+        [Authorize]
+        public async Task<ActionResult<LoginController.AccountInfo>> RequestMatch(string matchRequest)
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
+            int id = 0;
+            if (!CommonTool.GetID(HttpContext, ref id))
+                return Unauthorized();
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
-        {
-            var user = await _context.User.FindAsync(id);
+            User user = await _contextFactory.GetUser(id);
             if (user == null)
             {
-                return NotFound();
+                return NotFound("User Not Found");
             }
 
-            _context.User.Remove(user);
-            await _context.SaveChangesAsync();
+            if (!user.Request(matchRequest))
+            {
+                return BadRequest("Request Match Fail");
+            }
 
-            return NoContent();
+            if (!await _contextFactory.SaveUser(user))
+            { 
+                return BadRequest("Save User Fail");
+            }
+
+            return Ok(CommonTool.CreateAccount("", user));
+
         }
 
-        private bool UserExists(int id)
+
+        [HttpGet("Pay")]
+        [Authorize]
+        public async Task<ActionResult<LoginController.AccountInfo>> Pay(string payload)
         {
-            return _context.User.Any(e => e.Id == id);
+            if (PaymentValidator.Validate(payload))
+            {
+                int id = 0;
+                if (!CommonTool.GetID(HttpContext, ref id))
+                    return Unauthorized();
+
+                User user = await _contextFactory.GetUser(id);
+                if (user == null)
+                {
+                    return NotFound("User Not Found");
+                }
+
+                if (!user.Pay())
+                {
+                    return NotFound("Replay Url Not Fount");
+                }
+
+                if (!await _contextFactory.SaveUser(user))
+                {
+                    return BadRequest("Save User Fail");
+                }
+
+                return Ok(CommonTool.CreateAccount("", user));
+            }
+            else
+            { 
+                return BadRequest("Invalid Payload");
+            }
         }
     }
 }

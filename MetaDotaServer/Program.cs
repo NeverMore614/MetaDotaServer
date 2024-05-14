@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+ï»¿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MetaDotaServer.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,12 +12,10 @@ namespace MetaDotaServer
         public static void Main(string[] args)
         {
 
-
-
-
             var builder = WebApplication.CreateBuilder(args);
 
-            #region ×¢²áJWT·þÎñ
+
+            #region ×¢ï¿½ï¿½JWTï¿½ï¿½ï¿½ï¿½
 
             builder.Services.AddAuthentication(options =>
             {
@@ -35,14 +33,14 @@ namespace MetaDotaServer
                 };
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuer = true, //ÊÇ·ñÑéÖ¤Issuer
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"], //·¢ÐÐÈËIssuer
-                    ValidateAudience = true, //ÊÇ·ñÑéÖ¤Audience
-                    ValidAudience = builder.Configuration["Jwt:Audience"], //¶©ÔÄÈËAudience
-                    ValidateIssuerSigningKey = true, //ÊÇ·ñÑéÖ¤SecurityKey
+                    ValidateIssuer = true, //ï¿½Ç·ï¿½ï¿½ï¿½Ö¤Issuer
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"], //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Issuer
+                    ValidateAudience = true, //ï¿½Ç·ï¿½ï¿½ï¿½Ö¤Audience
+                    ValidAudience = builder.Configuration["Jwt:Audience"], //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Audience
+                    ValidateIssuerSigningKey = true, //ï¿½Ç·ï¿½ï¿½ï¿½Ö¤SecurityKey
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])), //SecurityKey
-                    ValidateLifetime = true, //ÊÇ·ñÑéÖ¤Ê§Ð§Ê±¼ä
-                    ClockSkew = TimeSpan.FromSeconds(0), //¹ýÆÚÊ±¼äÈÝ´íÖµ£¬½â¾ö·þÎñÆ÷¶ËÊ±¼ä²»Í¬²½ÎÊÌâ£¨Ãë£©
+                    ValidateLifetime = true, //ï¿½Ç·ï¿½ï¿½ï¿½Ö¤Ê§Ð§Ê±ï¿½ï¿½
+                    ClockSkew = TimeSpan.FromSeconds(0), //ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ý´ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä²»Í¬ï¿½ï¿½ï¿½ï¿½ï¿½â£¨ï¿½ë£©
                     RequireExpirationTime = true,
                 };
             }
@@ -50,13 +48,11 @@ namespace MetaDotaServer
             #endregion
 
             builder.Services.AddSingleton<MetaDotaServer.Tool.DbContextFactory>();
-            builder.Services.AddDbContext<UserContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("UserContext") ?? throw new InvalidOperationException("Connection string 'UserContext' not found.")));
 
  
             // Add services to the container.
             builder.Services.AddControllers();
-
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
