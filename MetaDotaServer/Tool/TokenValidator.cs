@@ -5,7 +5,7 @@
         public static bool Validate(string token, out string accountId, out int expireTime)
         {
             accountId = token;
-            expireTime = 120;
+            expireTime = 1200;
             return true;
         }
     }

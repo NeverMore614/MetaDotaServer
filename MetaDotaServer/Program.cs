@@ -14,14 +14,10 @@ namespace MetaDotaServer
 
             var builder = WebApplication.CreateBuilder(args);
 
-
             #region ע��JWT����
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            }
-            ).AddJwtBearer(options =>
+            //客户端验证
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer("Bearer", options =>
             {
                 options.Events = new JwtBearerEvents()
                 {
@@ -33,18 +29,42 @@ namespace MetaDotaServer
                 };
                 options.TokenValidationParameters = new TokenValidationParameters()
                 {
-                    ValidateIssuer = true, //�Ƿ���֤Issuer
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"], //������Issuer
-                    ValidateAudience = true, //�Ƿ���֤Audience
-                    ValidAudience = builder.Configuration["Jwt:Audience"], //������Audience
-                    ValidateIssuerSigningKey = true, //�Ƿ���֤SecurityKey
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])), //SecurityKey
-                    ValidateLifetime = true, //�Ƿ���֤ʧЧʱ��
-                    ClockSkew = TimeSpan.FromSeconds(0), //����ʱ���ݴ�ֵ�������������ʱ�䲻ͬ�����⣨�룩
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(10),
+                    RequireExpirationTime = true,
+                };
+            }
+            ).AddJwtBearer("BearerReplayBuilder", options =>
+            {
+                options.Events = new JwtBearerEvents()
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
+                };
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["Jwt2:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["Jwt2:Audience"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt2:SecretKey"])),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(10),
                     RequireExpirationTime = true,
                 };
             }
             );
+
             #endregion
 
             builder.Services.AddSingleton<MetaDotaServer.Tool.DbContextFactory>();

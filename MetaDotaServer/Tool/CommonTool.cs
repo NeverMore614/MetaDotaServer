@@ -7,6 +7,9 @@ namespace MetaDotaServer.Tool
 {
     public class CommonTool
     {
+        // Unix时间戳是从1970年1月1日开始计算
+        public static DateTime UnixStartTime = new DateTime(1970, 1, 1);
+
         public static AccountInfo CreateAccount(string jwt, User user)
         {
             UserInfo userInfo = new UserInfo();

@@ -99,17 +99,6 @@ namespace MetaDotaServer.Controllers
             return Ok(_invaildAccount);
         }
 
-        [HttpGet("auth")]
-        [Authorize]
-        public async Task<ActionResult<string>> auth()
-        {
-            var claim = (ClaimsIdentity)HttpContext.User.Identity;
-            var Id = Convert.ToInt32(claim.Claims.Where(x => x.Type.Contains("id")).FirstOrDefault().Value);
-            return Ok("你成功了！你的id是：" + Id);
-        }
-
-
-
         private string CreateToken(int id, int expireTime)
         {
             // 1. 定义需要使用到的Claims
@@ -151,6 +140,7 @@ namespace MetaDotaServer.Controllers
                 VideoUrl = "",
                 RequestMatch = "",
                 ErrorMessage = "",
+                MatchRequestState = MatchRequestState.None,
                 GenerateUrl = ""
             };
         }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MetaDotaServer.Controllers;
+using MetaDotaServer.Tool;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MetaDotaServer.Entity
@@ -40,8 +42,24 @@ namespace MetaDotaServer.Entity
 
         public bool Request(string match)
         {
-            RequestMatch = match;
-            return true;
+            if (MatchRequestState == MatchRequestState.None || MatchRequestState == MatchRequestState.Waiting || MatchRequestState == MatchRequestState.Fail)
+            {
+                RequestMatch = match;
+                // 当前时间
+                DateTime now = DateTime.UtcNow;
+                // 当前时间与Unix纪元之间的时间差
+                TimeSpan timeSpan = now - CommonTool.UnixStartTime;
+                // 将时间差转换为秒数
+                RequestTime = (int)timeSpan.TotalSeconds;
+
+                MatchRequestState = MatchRequestState.Waiting;
+
+                DbContextFactory.PutMatchRequest(this);
+
+                return true;
+            }
+            return false;
+
         }
 
         public bool Pay()
@@ -49,8 +67,30 @@ namespace MetaDotaServer.Entity
             if (MatchRequestState != MatchRequestState.Success || string.IsNullOrEmpty(GenerateUrl))
                 return false;
 
+            MatchRequestState = MatchRequestState.None;
+            RequestMatch = "";
             VideoUrl = GenerateUrl;
             return true;
+        }
+
+        public bool StartGenerate()
+        {
+            MatchRequestState = MatchRequestState.Generating;
+            return true;
+        }
+
+        public void GenerateSuccess(string url)
+        { 
+            if (!string.IsNullOrEmpty(url)) {
+                MatchRequestState = MatchRequestState.Success;
+                GenerateUrl = url;
+            }
+        }
+
+        public void GenerateFail(string message)
+        {
+            MatchRequestState = MatchRequestState.Fail;
+            ErrorMessage = message;
         }
 
     }

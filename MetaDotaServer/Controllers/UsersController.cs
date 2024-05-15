@@ -18,6 +18,7 @@ namespace MetaDotaServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class UsersController : ControllerBase
     {
 
@@ -30,7 +31,6 @@ namespace MetaDotaServer.Controllers
 
 
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<LoginController.AccountInfo>> Get()
         {
             int id = 0;
@@ -48,7 +48,6 @@ namespace MetaDotaServer.Controllers
 
 
         [HttpGet("RequestMatch")]
-        [Authorize]
         public async Task<ActionResult<LoginController.AccountInfo>> RequestMatch(string matchRequest)
         {
             int id = 0;
@@ -77,7 +76,6 @@ namespace MetaDotaServer.Controllers
 
 
         [HttpGet("Pay")]
-        [Authorize]
         public async Task<ActionResult<LoginController.AccountInfo>> Pay(string payload)
         {
             if (PaymentValidator.Validate(payload))
