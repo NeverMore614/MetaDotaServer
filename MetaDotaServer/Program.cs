@@ -14,6 +14,15 @@ namespace MetaDotaServer
 
             var builder = WebApplication.CreateBuilder(args);
 
+
+            builder.Services.AddDbContext<MetaDotaServer.Data.TokenContext>(options =>
+    
+    options.UseSqlServer(builder.Configuration.GetConnectionString("TokenContext") ?? throw new InvalidOperationException("Connection string 'ClassContext' not found.")));
+    
+            builder.Services.AddDbContext<UserContext>(options =>
+    
+    options.UseSqlServer(builder.Configuration.GetConnectionString("UserContext") ?? throw new InvalidOperationException("Connection string 'ClassContext' not found.")));
+
             #region ע��JWT����
 
             //客户端验证

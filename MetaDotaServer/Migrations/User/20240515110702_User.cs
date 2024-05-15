@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace MetaDotaServer.Migrations
+namespace MetaDotaServer.Migrations.User
 {
     /// <inheritdoc />
-    public partial class UpdateInfo : Migration
+    public partial class User : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

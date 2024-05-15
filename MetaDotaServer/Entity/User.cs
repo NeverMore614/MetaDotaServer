@@ -17,7 +17,7 @@ namespace MetaDotaServer.Entity
     [Table("User")]
     public class User
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public int Id { get; set; }
 
         public string Name { get; set; }

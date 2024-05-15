@@ -2,10 +2,10 @@
 
 #nullable disable
 
-namespace MetaDotaServer.Migrations.Token
+namespace MetaDotaServer.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateInfo : Migration
+    public partial class Token : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

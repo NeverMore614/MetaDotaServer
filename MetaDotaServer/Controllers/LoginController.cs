@@ -19,8 +19,8 @@ using Swashbuckle.Swagger;
 
 namespace MetaDotaServer.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
 
@@ -52,6 +52,11 @@ namespace MetaDotaServer.Controllers
             public bool Vaild { get; set; }
             public string Jwt { get; set; }
             public UserInfo UserInfo { get; set; }
+        }
+        [HttpGet("test")]
+        public string test()
+        {
+            return "test";
         }
         [HttpGet]
         public async Task<ActionResult<AccountInfo>> Get(string token)

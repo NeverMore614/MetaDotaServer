@@ -14,6 +14,10 @@
     "mssql3": {
       "type": "mssql.local",
       "connectionId": "ConnectionStrings:MetaDotaServerContext"
+    },
+    "mssql4": {
+      "type": "mssql.local",
+      "connectionId": "ConnectionStrings:ClassContext"
     }
   }
 }
