@@ -5,7 +5,7 @@
 namespace MetaDotaServer.Migrations.User
 {
     /// <inheritdoc />
-    public partial class User : Migration
+    public partial class UpdateInfo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

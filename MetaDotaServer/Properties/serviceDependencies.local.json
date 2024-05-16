@@ -1,23 +1,24 @@
 {
   "dependencies": {
     "mssql1": {
-      "serviceConnectorResourceId": "",
-      "secretStore": null,
-      "resourceId": null,
-      "type": "mssql.local",
-      "connectionId": "ConnectionStrings:UserContext"
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:ClassContext"
     },
     "mssql2": {
-      "type": "mssql.local",
+      "ignored": "true",
+      "type": "mssql",
       "connectionId": "ConnectionStrings:TokenContext"
     },
     "mssql3": {
-      "type": "mssql.local",
-      "connectionId": "ConnectionStrings:MetaDotaServerContext"
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:UserContext"
     },
     "mssql4": {
-      "type": "mssql.local",
-      "connectionId": "ConnectionStrings:ClassContext"
+      "ignored": "true",
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:MetaDotaServerContext"
     }
   }
 }

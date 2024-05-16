@@ -5,7 +5,7 @@
 namespace MetaDotaServer.Migrations
 {
     /// <inheritdoc />
-    public partial class Token : Migration
+    public partial class UpdateInfo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

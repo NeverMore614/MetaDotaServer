@@ -1,20 +1,3 @@
 {
-  "dependencies": {
-    "mssql1": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:UserContext"
-    },
-    "mssql2": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:TokenContext"
-    },
-    "mssql3": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:MetaDotaServerContext"
-    },
-    "mssql4": {
-      "type": "mssql",
-      "connectionId": "ConnectionStrings:ClassContext"
-    }
-  }
+  "dependencies": {}
 }
