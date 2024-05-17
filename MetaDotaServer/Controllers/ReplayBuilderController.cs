@@ -21,21 +21,45 @@ namespace MetaDotaServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ReplayBuilderController : ControllerBase
     {
 
-
+        private readonly IConfiguration _configuration;
         private readonly DbContextFactory _contextFactory;
-        public ReplayBuilderController(DbContextFactory contextFactory)
+        public ReplayBuilderController(DbContextFactory contextFactory, IConfiguration configuration)
         {
             _contextFactory = contextFactory;
-
+            _configuration = configuration;
         }
 
+        [HttpGet]
+        public string GetAuth()
+        {
+            Claim[] claims = new Claim[] { };
+            // 2. 从 appsettings.json 中读取SecretKey
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt2:SecretKey"]));
 
+            // 3. 选择加密算法
+            var algorithm = SecurityAlgorithms.HmacSha256;
 
+            // 4. 生成Credentials
+            var signingCredentials = new SigningCredentials(secretKey, algorithm);
 
+            // 5. 根据以上，生成token
+            var jwtSecurityToken = new JwtSecurityToken(
+                _configuration["Jwt2:Issuer"],    //Issuer
+                _configuration["Jwt2:Audience"],  //Audience
+                claims,                          //Claims,
+                DateTime.Now,                    //notBefore
+                DateTime.Now.AddSeconds(60 * 60 * 24 * 365 * 20),     //expires
+                signingCredentials               //Credentials
+            );
+
+            // 6. 将token变为string
+            return new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        }
+
+        [Authorize(AuthenticationSchemes = "BearerReplayBuilder")]
         [HttpGet("GetMatchRequest")]
         public async Task<ActionResult<DbContextFactory.MatchRequest>> GetMatchRequest()
         {
@@ -64,6 +88,7 @@ namespace MetaDotaServer.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "BearerReplayBuilder")]
         [HttpPost("GenerateOver")]
         public async Task<ActionResult<bool>> GenerateOver(int id, string state, string message)
         {

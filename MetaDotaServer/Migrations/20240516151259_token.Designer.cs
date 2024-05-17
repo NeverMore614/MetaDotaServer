@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MetaDotaServer.Migrations
 {
     [DbContext(typeof(TokenContext))]
-    [Migration("20240516114622_UpdateInfo")]
-    partial class UpdateInfo
+    [Migration("20240516151259_token")]
+    partial class token
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
