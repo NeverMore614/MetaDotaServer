@@ -22,8 +22,8 @@ namespace MetaDotaServer.Controllers
     public class UsersController : ControllerBase
     {
 
-        private readonly DbContextFactory _contextFactory;
-        public UsersController(DbContextFactory contextFactory)
+        private readonly MDSDbContextFactory _contextFactory;
+        public UsersController(MDSDbContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
         }
@@ -34,7 +34,7 @@ namespace MetaDotaServer.Controllers
         public async Task<ActionResult<LoginController.AccountInfo>> Get()
         {
             int id = 0;
-            if  (!CommonTool.GetID(HttpContext, ref id))
+            if  (!MDSCommonTool.GetID(HttpContext, ref id))
                 return Unauthorized();
 
             User user = await _contextFactory.GetUser(id);
@@ -43,7 +43,7 @@ namespace MetaDotaServer.Controllers
                 return NotFound("User Not Found");
             }
 
-            return Ok(CommonTool.CreateAccount("", user));
+            return Ok(MDSCommonTool.CreateAccount("", user));
         }
 
 
@@ -51,7 +51,7 @@ namespace MetaDotaServer.Controllers
         public async Task<ActionResult<LoginController.AccountInfo>> RequestMatch(string matchRequest)
         {
             int id = 0;
-            if (!CommonTool.GetID(HttpContext, ref id))
+            if (!MDSCommonTool.GetID(HttpContext, ref id))
                 return Unauthorized();
 
             User user = await _contextFactory.GetUser(id);
@@ -70,7 +70,7 @@ namespace MetaDotaServer.Controllers
                 return BadRequest("Save User Fail");
             }
 
-            return Ok(CommonTool.CreateAccount("", user));
+            return Ok(MDSCommonTool.CreateAccount("", user));
 
         }
 
@@ -78,10 +78,10 @@ namespace MetaDotaServer.Controllers
         [HttpGet("Pay")]
         public async Task<ActionResult<LoginController.AccountInfo>> Pay(string payload)
         {
-            if (PaymentValidator.Validate(payload))
+            if (MDSPaymentValidator.Validate(payload))
             {
                 int id = 0;
-                if (!CommonTool.GetID(HttpContext, ref id))
+                if (!MDSCommonTool.GetID(HttpContext, ref id))
                     return Unauthorized();
 
                 User user = await _contextFactory.GetUser(id);
@@ -100,7 +100,7 @@ namespace MetaDotaServer.Controllers
                     return BadRequest("Save User Fail");
                 }
 
-                return Ok(CommonTool.CreateAccount("", user));
+                return Ok(MDSCommonTool.CreateAccount("", user));
             }
             else
             { 

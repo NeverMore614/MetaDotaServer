@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
-using static MetaDotaServer.Tool.DbContextFactory;
+using static MetaDotaServer.Tool.MDSDbContextFactory;
 
 namespace MetaDotaServer.Tool
 {
-    public class DbContextFactory
+    public class MDSDbContextFactory
     {
         public struct MatchRequest
         {
@@ -24,13 +24,13 @@ namespace MetaDotaServer.Tool
 
         private MatchRequest empty = new MatchRequest();
 
-        private static DbContextFactory _instance;
+        private static MDSDbContextFactory _instance;
 
         private Queue<MatchRequest> _requestQueue;
 
 
         private readonly IConfiguration _configuration;
-        public DbContextFactory(IConfiguration configuration) {
+        public MDSDbContextFactory(IConfiguration configuration) {
             _configuration = configuration;
 
             _requestQueue = new Queue<MatchRequest>();

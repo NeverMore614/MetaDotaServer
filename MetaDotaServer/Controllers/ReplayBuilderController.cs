@@ -25,8 +25,8 @@ namespace MetaDotaServer.Controllers
     {
 
         private readonly IConfiguration _configuration;
-        private readonly DbContextFactory _contextFactory;
-        public ReplayBuilderController(DbContextFactory contextFactory, IConfiguration configuration)
+        private readonly MDSDbContextFactory _contextFactory;
+        public ReplayBuilderController(MDSDbContextFactory contextFactory, IConfiguration configuration)
         {
             _contextFactory = contextFactory;
             _configuration = configuration;
@@ -61,9 +61,9 @@ namespace MetaDotaServer.Controllers
 
         [Authorize(AuthenticationSchemes = "BearerReplayBuilder")]
         [HttpGet("GetMatchRequest")]
-        public async Task<ActionResult<DbContextFactory.MatchRequest>> GetMatchRequest()
+        public async Task<ActionResult<MDSDbContextFactory.MatchRequest>> GetMatchRequest()
         {
-            DbContextFactory.MatchRequest matchRequest = _contextFactory.GetMatchRequest();
+            MDSDbContextFactory.MatchRequest matchRequest = _contextFactory.GetMatchRequest();
             if (matchRequest.isEmpty())
                 return NotFound("no match");
 

@@ -16,6 +16,8 @@ using MetaDotaServer.Tool;
 using NuGet.Common;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Swashbuckle.Swagger;
+using Microsoft.Identity.Client;
+using MetaDotaServer.Migrations.User;
 
 namespace MetaDotaServer.Controllers
 {
@@ -25,10 +27,11 @@ namespace MetaDotaServer.Controllers
     {
 
         private readonly IConfiguration _configuration;
-        private readonly DbContextFactory _contextFactory;
+        private readonly MDSDbContextFactory _contextFactory;
+        private readonly MDSEmailSender _smtpSender;
 
         private AccountInfo _invaildAccount;
-        public LoginController(IConfiguration configuration, DbContextFactory contextFactory)
+        public LoginController(IConfiguration configuration, MDSDbContextFactory contextFactory, MDSEmailSender smtpSender)
         {
             _configuration = configuration;
             _invaildAccount = new AccountInfo()
@@ -36,6 +39,7 @@ namespace MetaDotaServer.Controllers
                 Vaild = false
             };
             _contextFactory = contextFactory;
+            _smtpSender = smtpSender;
         }
 
 
@@ -53,18 +57,29 @@ namespace MetaDotaServer.Controllers
             public string Jwt { get; set; }
             public UserInfo UserInfo { get; set; }
         }
-        [HttpGet("test")]
-        public string test()
-        {
-            return "test";
-        }
+
         [HttpGet]
+        public async Task<ActionResult<bool>> EmailLogin(string email)
+        { 
+            if (string.IsNullOrEmpty(email) || !MDSCommonTool.CheckEmail(email))
+            {
+                return Ok(false);
+            }
+
+            string jwt = CreateToken(user.Id, 2592000);
+
+            var result = _smtpSender.Send(email, "21313", "12312332").Result;
+            return Ok(result);
+        }
+
+
+        [Obsolete]
         public async Task<ActionResult<AccountInfo>> Get(string token)
         {
             //验证登录token
             string accountId;
             int expireTime;
-            if (TokenValidator.Validate(token, out accountId, out expireTime))
+            if (MDSTokenValidator.Validate(token, out accountId, out expireTime))
             {
                 User user;
                 using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
@@ -97,7 +112,7 @@ namespace MetaDotaServer.Controllers
                     
                 }
                 string jwt = CreateToken(user.Id, expireTime);
-                return Ok(CommonTool.CreateAccount(jwt, user));
+                return Ok(MDSCommonTool.CreateAccount(jwt, user));
 
             }
 

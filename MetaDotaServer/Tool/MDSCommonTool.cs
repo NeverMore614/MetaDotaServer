@@ -2,10 +2,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using static MetaDotaServer.Controllers.LoginController;
+using System.Text.RegularExpressions;
 
 namespace MetaDotaServer.Tool
 {
-    public class CommonTool
+    public class MDSCommonTool
     {
         // Unix时间戳是从1970年1月1日开始计算
         public static DateTime UnixStartTime = new DateTime(1970, 1, 1);
@@ -39,6 +40,12 @@ namespace MetaDotaServer.Tool
                 return false;
             }
             return true;
+        }
+
+        static string _email_regex = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
+        public static bool CheckEmail(string address)
+        {
+            return Regex.IsMatch(address, _email_regex);
         }
     }
 }

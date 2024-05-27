@@ -1,6 +1,6 @@
 ﻿namespace MetaDotaServer.Tool
 {
-    public class PaymentValidator
+    public class MDSPaymentValidator
     {
         public static bool Validate(string payload)
         {

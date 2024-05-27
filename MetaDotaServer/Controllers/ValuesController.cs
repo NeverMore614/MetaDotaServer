@@ -21,12 +21,20 @@ namespace MetaDotaServer.Controllers
         [HttpGet]
         public string Get()
         {
-            var options = new DbContextOptionsBuilder<UserContext>()
+            try
+            {
+                var options = new DbContextOptionsBuilder<UserContext>()
 .UseSqlServer(_configuration.GetConnectionString("UserContext") ?? throw new InvalidOperationException("Connection string 'UserContext' not found."))
 .Options;
-            UserContext userContext = new UserContext(options);
+                UserContext userContext = new UserContext(options);
 
-            userContext.User.ToList();
+                userContext.User.ToList();
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
             return "success";
         }
     }

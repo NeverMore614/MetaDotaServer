@@ -4,6 +4,7 @@ using MetaDotaServer.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MetaDotaServer.Tool;
 
 namespace MetaDotaServer
 {
@@ -76,8 +77,8 @@ namespace MetaDotaServer
 
             #endregion
 
-            builder.Services.AddSingleton<MetaDotaServer.Tool.DbContextFactory>();
-
+            builder.Services.AddSingleton<MetaDotaServer.Tool.MDSDbContextFactory>();
+            builder.Services.AddSingleton<MDSEmailSender>();
  
             // Add services to the container.
             builder.Services.AddControllers();

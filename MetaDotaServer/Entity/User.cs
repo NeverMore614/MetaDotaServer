@@ -48,13 +48,13 @@ namespace MetaDotaServer.Entity
                 // 当前时间
                 DateTime now = DateTime.UtcNow;
                 // 当前时间与Unix纪元之间的时间差
-                TimeSpan timeSpan = now - CommonTool.UnixStartTime;
+                TimeSpan timeSpan = now - MDSCommonTool.UnixStartTime;
                 // 将时间差转换为秒数
                 RequestTime = (int)timeSpan.TotalSeconds;
 
                 MatchRequestState = MatchRequestState.Waiting;
 
-                DbContextFactory.PutMatchRequest(this);
+                MDSDbContextFactory.PutMatchRequest(this);
 
                 return true;
             }
