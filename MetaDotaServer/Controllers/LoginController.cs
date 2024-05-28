@@ -18,6 +18,13 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Swashbuckle.Swagger;
 using Microsoft.Identity.Client;
 using MetaDotaServer.Migrations.User;
+using System.Drawing;
+using System.Drawing.Imaging;
+using Microsoft.AspNetCore.Identity;
+using static Org.BouncyCastle.Asn1.Cmp.Challenge;
+using static System.Net.Mime.MediaTypeNames;
+using System.Security.Policy;
+using System.Collections;
 
 namespace MetaDotaServer.Controllers
 {
@@ -57,19 +64,42 @@ namespace MetaDotaServer.Controllers
             public string Jwt { get; set; }
             public UserInfo UserInfo { get; set; }
         }
+        [HttpGet("PreLogin")]
+        public async Task<ActionResult> PreLogin()
+        {
+
+
+            // 生成随机验证码
+            string code = MDSCommonTool.GenerateRandomCode();
+            string md5Img = MDSCommonTool.GenerateRandomCodeImage(code);
+
+            //jwt
+            string jwt = CreateToken(new Hashtable() { ["code"] = code }, 10, "Jwt3");
+
+
+            var response = new
+            {
+                Img = md5Img,
+                Jwt = jwt
+            };
+
+            return Ok(response);
+        }
 
         [HttpGet]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<bool>> EmailLogin(string email)
         { 
-            if (string.IsNullOrEmpty(email) || !MDSCommonTool.CheckEmail(email))
-            {
-                return Ok(false);
-            }
-
-            string jwt = CreateToken(user.Id, 2592000);
-
-            var result = _smtpSender.Send(email, "21313", "12312332").Result;
-            return Ok(result);
+            return Ok(email);
+            //if (string.IsNullOrEmpty(email) || !MDSCommonTool.CheckEmail(email))
+            //{
+            //    return Ok(false);
+            //}
+            //
+            //string jwt = CreateToken(user.Id, 2592000);
+            //
+            //var result = _smtpSender.Send(email, "21313", "12312332").Result;
+            //return Ok(result);
         }
 
 
@@ -81,7 +111,7 @@ namespace MetaDotaServer.Controllers
             int expireTime;
             if (MDSTokenValidator.Validate(token, out accountId, out expireTime))
             {
-                User user;
+                Entity.User user;
                 using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
                 {
                     var info = await tokenContext.Token.FindAsync(accountId);
@@ -90,7 +120,7 @@ namespace MetaDotaServer.Controllers
                         user = NewUser();
                         using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
                         {
-                            EntityEntry<User> newUser = await userContext.User.AddAsync(user);
+                            EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
                             await userContext.SaveChangesAsync();
                             user.Id = newUser.Entity.Id;
                         }
@@ -111,7 +141,7 @@ namespace MetaDotaServer.Controllers
                     }
                     
                 }
-                string jwt = CreateToken(user.Id, expireTime);
+                string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, expireTime, "Jwt");
                 return Ok(MDSCommonTool.CreateAccount(jwt, user));
 
             }
@@ -119,16 +149,18 @@ namespace MetaDotaServer.Controllers
             return Ok(_invaildAccount);
         }
 
-        private string CreateToken(int id, int expireTime)
+        private string CreateToken(Hashtable kv, int expireTime, string jwtName)
         {
             // 1. 定义需要使用到的Claims
-            var claims = new[]
+            Claim[] claims = new Claim[kv.Count];
+            int i = 0;
+            foreach (string key in kv.Keys)
             {
-            new Claim("id", id.ToString()),
-            };
+                claims[i++] = new Claim(key, kv[key].ToString());
+            }
 
             // 2. 从 appsettings.json 中读取SecretKey
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration[$"{jwtName}:SecretKey"]));
 
             // 3. 选择加密算法
             var algorithm = SecurityAlgorithms.HmacSha256;
@@ -138,8 +170,8 @@ namespace MetaDotaServer.Controllers
 
             // 5. 根据以上，生成token
             var jwtSecurityToken = new JwtSecurityToken(
-                _configuration["Jwt:Issuer"],    //Issuer
-                _configuration["Jwt:Audience"],  //Audience
+                _configuration[$"{jwtName}:Issuer"],    //Issuer
+                _configuration[$"{jwtName}:Audience"],  //Audience
                 claims,                          //Claims,
                 DateTime.Now,                    //notBefore
                 DateTime.Now.AddSeconds(expireTime),     //expires
@@ -152,9 +184,9 @@ namespace MetaDotaServer.Controllers
             return token;
         }
 
-        private User NewUser()
+        private Entity.User NewUser()
         {
-            return new User()
+            return new Entity.User()
             {
                 Name = new Guid().ToString(),
                 VideoUrl = "",
