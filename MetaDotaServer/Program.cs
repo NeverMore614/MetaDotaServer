@@ -104,14 +104,27 @@ namespace MetaDotaServer
  
             // Add services to the container.
             builder.Services.AddControllers();
-            
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy
+                    (name: "myCors",
+                        builde =>
+                        {
+                            builde.WithOrigins("http://localhost:5069");
+                        }
+                    );
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+            app.UseCors("myCors");
 
-  
+
             app.UseAuthentication();
             app.UseAuthorization();
             

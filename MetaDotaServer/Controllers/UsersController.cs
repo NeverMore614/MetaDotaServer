@@ -13,10 +13,12 @@ using MetaDotaServer.Tool;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Identity.Client;
 using NuGet.Common;
+using Microsoft.AspNetCore.Cors;
 
 namespace MetaDotaServer.Controllers
 {
     [Route("api/[controller]")]
+    [EnableCors]
     [ApiController]
     [Authorize(AuthenticationSchemes = "Bearer")]
     public class UsersController : ControllerBase

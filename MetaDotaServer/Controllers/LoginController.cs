@@ -26,9 +26,11 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Security.Policy;
 using System.Collections;
 using Org.BouncyCastle.Crypto;
+using Microsoft.AspNetCore.Cors;
 
 namespace MetaDotaServer.Controllers
 {
+    [EnableCors]
     [ApiController]
     [Route("api/[controller]")]
     public class LoginController : ControllerBase

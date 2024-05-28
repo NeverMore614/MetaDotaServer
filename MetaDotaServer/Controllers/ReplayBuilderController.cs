@@ -16,9 +16,11 @@ using MetaDotaServer.Tool;
 using NuGet.Common;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using static MetaDotaServer.Controllers.ReplayBuilderController;
+using Microsoft.AspNetCore.Cors;
 
 namespace MetaDotaServer.Controllers
 {
+    [EnableCors]
     [Route("api/[controller]")]
     [ApiController]
     public class ReplayBuilderController : ControllerBase

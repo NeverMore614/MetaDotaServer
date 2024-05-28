@@ -4,10 +4,12 @@ using MetaDotaServer.Data;
 using MetaDotaServer.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
 namespace MetaDotaServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableCors]
     public class ValuesController : ControllerBase
     {
 
