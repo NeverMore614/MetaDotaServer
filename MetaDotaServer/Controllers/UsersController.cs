@@ -33,9 +33,11 @@ namespace MetaDotaServer.Controllers
         [HttpGet]
         public async Task<ActionResult<LoginController.AccountInfo>> Get()
         {
-            int id = 0;
-            if  (!MDSCommonTool.GetID(HttpContext, ref id))
+            string idStr = "";
+            if  (!MDSCommonTool.GetAuthValue(HttpContext,"id", ref idStr))
                 return Unauthorized();
+
+            int id = int.Parse(idStr);
 
             User user = await _contextFactory.GetUser(id);
             if (user == null)
@@ -50,9 +52,11 @@ namespace MetaDotaServer.Controllers
         [HttpGet("RequestMatch")]
         public async Task<ActionResult<LoginController.AccountInfo>> RequestMatch(string matchRequest)
         {
-            int id = 0;
-            if (!MDSCommonTool.GetID(HttpContext, ref id))
+            string idStr = "";
+            if (!MDSCommonTool.GetAuthValue(HttpContext, "id", ref idStr))
                 return Unauthorized();
+
+            int id = int.Parse(idStr);
 
             User user = await _contextFactory.GetUser(id);
             if (user == null)
@@ -80,9 +84,11 @@ namespace MetaDotaServer.Controllers
         {
             if (MDSPaymentValidator.Validate(payload))
             {
-                int id = 0;
-                if (!MDSCommonTool.GetID(HttpContext, ref id))
+                string idStr = "";
+                if (!MDSCommonTool.GetAuthValue(HttpContext, "id", ref idStr))
                     return Unauthorized();
+
+                int id = int.Parse(idStr);
 
                 User user = await _contextFactory.GetUser(id);
                 if (user == null)

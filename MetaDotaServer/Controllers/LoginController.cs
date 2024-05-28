@@ -25,6 +25,7 @@ using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 using static System.Net.Mime.MediaTypeNames;
 using System.Security.Policy;
 using System.Collections;
+using Org.BouncyCastle.Crypto;
 
 namespace MetaDotaServer.Controllers
 {
@@ -32,7 +33,8 @@ namespace MetaDotaServer.Controllers
     [Route("api/[controller]")]
     public class LoginController : ControllerBase
     {
-
+        private const string EmailSubject = "MetaDota邮件登录";
+        private const string EmailBody = "请点击以下链接完成登录：\n";
         private readonly IConfiguration _configuration;
         private readonly MDSDbContextFactory _contextFactory;
         private readonly MDSEmailSender _smtpSender;
@@ -74,7 +76,7 @@ namespace MetaDotaServer.Controllers
             string md5Img = MDSCommonTool.GenerateRandomCodeImage(code);
 
             //jwt
-            string jwt = CreateToken(new Hashtable() { ["code"] = code }, 10, "Jwt3");
+            string jwt = CreateToken(new Hashtable() { ["code"] = code }, 15, "Jwt3");
 
 
             var response = new
@@ -87,21 +89,64 @@ namespace MetaDotaServer.Controllers
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = "Bearer")]
-        public async Task<ActionResult<bool>> EmailLogin(string email)
-        { 
-            return Ok(email);
-            //if (string.IsNullOrEmpty(email) || !MDSCommonTool.CheckEmail(email))
-            //{
-            //    return Ok(false);
-            //}
-            //
-            //string jwt = CreateToken(user.Id, 2592000);
-            //
-            //var result = _smtpSender.Send(email, "21313", "12312332").Result;
-            //return Ok(result);
+        [Authorize(AuthenticationSchemes = "BearerLogin")]
+        public async Task<ActionResult<bool>> EmailLogin(string email, string redicUrl, string authcode)
+        {
+            //验证码校验
+            string code = "";
+            if (!MDSCommonTool.GetAuthValue(HttpContext, "code", ref code))
+                return Unauthorized();
+
+            if (!authcode.Equals(code))
+                return Unauthorized();
+
+
+            if (string.IsNullOrEmpty(email) || !MDSCommonTool.CheckEmail(email))
+            {
+                return Ok(false);
+            }
+
+            Entity.User user = CreatrOrGetUser(email).Result;
+
+            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
+
+            return Ok(_smtpSender.Send(email, EmailSubject, EmailBody + redicUrl + jwt).Result);
         }
 
+        public async Task<Entity.User> CreatrOrGetUser(string accountId)
+        {
+            Entity.User user;
+            using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
+            {
+                var info = await tokenContext.Token.FindAsync(accountId);
+                if (info == null)
+                {
+                    user = NewUser();
+                    using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
+                    {
+                        EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
+                        await userContext.SaveChangesAsync();
+                        user.Id = newUser.Entity.Id;
+                    }
+                    info = new Entity.Token()
+                    {
+                        TokenStr = accountId,
+                        Id = user.Id
+                    };
+                    await tokenContext.Token.AddAsync(info);
+                    await tokenContext.SaveChangesAsync();
+                }
+                else
+                {
+                    using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
+                    {
+                        user = await userContext.User.FindAsync(info.Id);
+                    }
+                }
+
+            }
+            return user;
+        }
 
         [Obsolete]
         public async Task<ActionResult<AccountInfo>> Get(string token)
@@ -111,36 +156,8 @@ namespace MetaDotaServer.Controllers
             int expireTime;
             if (MDSTokenValidator.Validate(token, out accountId, out expireTime))
             {
-                Entity.User user;
-                using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
-                {
-                    var info = await tokenContext.Token.FindAsync(accountId);
-                    if (info == null)
-                    {
-                        user = NewUser();
-                        using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
-                        {
-                            EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
-                            await userContext.SaveChangesAsync();
-                            user.Id = newUser.Entity.Id;
-                        }
-                        info = new Entity.Token()
-                        {
-                            TokenStr = accountId,
-                            Id = user.Id
-                        };
-                        await tokenContext.Token.AddAsync(info);
-                        await tokenContext.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
-                        {
-                            user = await userContext.User.FindAsync(info.Id);
-                        }
-                    }
-                    
-                }
+                Entity.User user = CreatrOrGetUser(accountId).Result;
+
                 string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, expireTime, "Jwt");
                 return Ok(MDSCommonTool.CreateAccount(jwt, user));
 

@@ -34,12 +34,12 @@ namespace MetaDotaServer.Tool
             };
         }
 
-        public static bool GetID(HttpContext httpContext, ref int id)
+        public static bool GetAuthValue(HttpContext httpContext, string claimKey,  ref string value)
         {
             try
             {
                 var claim = (ClaimsIdentity)httpContext.User.Identity;
-                id = Convert.ToInt32(claim.Claims.Where(x => x.Type.Contains("id")).FirstOrDefault().Value);
+                value = (claim.Claims.Where(x => x.Type.Contains(claimKey)).FirstOrDefault().Value);
             }
             catch (Exception ex)
             {

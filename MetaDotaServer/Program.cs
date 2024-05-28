@@ -73,6 +73,28 @@ namespace MetaDotaServer
                     RequireExpirationTime = true,
                 };
             }
+            ).AddJwtBearer("BearerLogin", options =>
+            {
+                options.Events = new JwtBearerEvents()
+                {
+                    OnMessageReceived = context =>
+                    {
+                        context.Token = context.Request.Cookies["access_token"];
+                        return Task.CompletedTask;
+                    }
+                };
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["Jwt3:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["Jwt3:Audience"],
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt3:SecretKey"])),
+                    ValidateLifetime = true,
+                    RequireExpirationTime = true,
+                };
+            }
             );
 
             #endregion
