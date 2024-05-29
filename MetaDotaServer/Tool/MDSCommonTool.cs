@@ -92,5 +92,13 @@ namespace MetaDotaServer.Tool
             bmp.Save(ms, ImageFormat.Png);
             return Convert.ToBase64String(ms.ToArray());
         }
+
+        static Regex _matchRegex = new Regex("^[0-9]+_[0-9]+$");
+
+        public static bool CheckMatchValid(string match)
+        {
+            if (string.IsNullOrEmpty(match)) return false;
+            return _matchRegex.IsMatch(match);
+        }
     }
 }

@@ -92,6 +92,7 @@ namespace MetaDotaServer
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt3:SecretKey"])),
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromSeconds(3),
                     RequireExpirationTime = true,
                 };
             }

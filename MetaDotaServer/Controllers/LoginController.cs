@@ -27,6 +27,7 @@ using System.Security.Policy;
 using System.Collections;
 using Org.BouncyCastle.Crypto;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace MetaDotaServer.Controllers
 {
@@ -109,64 +110,91 @@ namespace MetaDotaServer.Controllers
             }
 
             Entity.User user = CreatrOrGetUser(email).Result;
+            if (user == null)
+            {
+                return Problem("sorry, server has error");
+            }
 
-            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
 
-            return Ok(_smtpSender.Send(email, EmailSubject, EmailBody + redicUrl + jwt).Result);
+            byte[] data = System.Text.Encoding.UTF8.GetBytes(user.Jwt);
+            string base64String = Convert.ToBase64String(data);
+
+            return Ok(_smtpSender.Send(email, EmailSubject, EmailBody + redicUrl + base64String).Result);
         }
+
 
         public async Task<Entity.User> CreatrOrGetUser(string accountId)
         {
             Entity.User user;
-            using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
+            try
             {
-                var info = await tokenContext.Token.FindAsync(accountId);
-                if (info == null)
+                using (MetaDotaServer.Data.TokenContext tokenContext = _contextFactory.CreateTokenDb())
                 {
-                    user = NewUser();
-                    using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
+                    var info = await tokenContext.Token.FindAsync(accountId);
+                    if (info == null)
                     {
-                        EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
-                        await userContext.SaveChangesAsync();
-                        user.Id = newUser.Entity.Id;
-                    }
-                    info = new Entity.Token()
-                    {
-                        TokenStr = accountId,
-                        Id = user.Id
-                    };
-                    await tokenContext.Token.AddAsync(info);
-                    await tokenContext.SaveChangesAsync();
-                }
-                else
-                {
-                    using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
-                    {
-                        user = await userContext.User.FindAsync(info.Id);
-                    }
-                }
+                        user = NewUser();
+                        using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
+                        {
+                            EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
+  
+                            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
+                            newUser.Entity.UpdateJwt(jwt);
 
+                            newUser.State = EntityState.Modified;
+                            await userContext.SaveChangesAsync();
+
+                            user.Id = newUser.Entity.Id;
+                            user.UpdateJwt(jwt);
+                        }
+                        info = new Entity.Token()
+                        {
+                            TokenStr = accountId,
+                            Id = user.Id
+                        };
+                        await tokenContext.Token.AddAsync(info);
+                        await tokenContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
+                        {
+
+                            user = await userContext.User.FindAsync(info.Id);
+                            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
+                            user.UpdateJwt(jwt);
+                            userContext.User.Entry(user).State = EntityState.Modified;
+                            await userContext.SaveChangesAsync();
+                        }
+                    }
+
+                }
             }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
             return user;
         }
 
-        [Obsolete]
-        public async Task<ActionResult<AccountInfo>> Get(string token)
-        {
-            //验证登录token
-            string accountId;
-            int expireTime;
-            if (MDSTokenValidator.Validate(token, out accountId, out expireTime))
-            {
-                Entity.User user = CreatrOrGetUser(accountId).Result;
-
-                string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, expireTime, "Jwt");
-                return Ok(MDSCommonTool.CreateAccount(jwt, user));
-
-            }
-
-            return Ok(_invaildAccount);
-        }
+        //[Obsolete]
+        //public async Task<ActionResult<AccountInfo>> Get(string token)
+        //{
+        //    //验证登录token
+        //    string accountId;
+        //    int expireTime;
+        //    if (MDSTokenValidator.Validate(token, out accountId, out expireTime))
+        //    {
+        //        Entity.User user = CreatrOrGetUser(accountId).Result;
+        //
+        //        string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, expireTime, "Jwt");
+        //        return Ok(MDSCommonTool.CreateAccount(jwt, user));
+        //
+        //    }
+        //
+        //    return Ok(_invaildAccount);
+        //}
 
         private string CreateToken(Hashtable kv, int expireTime, string jwtName)
         {

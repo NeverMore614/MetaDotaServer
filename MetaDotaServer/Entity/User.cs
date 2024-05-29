@@ -40,9 +40,11 @@ namespace MetaDotaServer.Entity
         //生成的视频地址
         public string GenerateUrl { get; set; }
 
+        public string Jwt { get; set; }
+
         public bool Request(string match)
         {
-            if (MatchRequestState == MatchRequestState.None || MatchRequestState == MatchRequestState.Waiting || MatchRequestState == MatchRequestState.Fail)
+            if (MDSCommonTool.CheckMatchValid(match) && ( MatchRequestState == MatchRequestState.None || MatchRequestState == MatchRequestState.Waiting || MatchRequestState == MatchRequestState.Fail))
             {
                 RequestMatch = match;
                 // 当前时间
@@ -93,5 +95,9 @@ namespace MetaDotaServer.Entity
             ErrorMessage = message;
         }
 
+        public void UpdateJwt(string jwt)
+        {
+            Jwt = jwt;
+        }
     }
 }
