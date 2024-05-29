@@ -111,7 +111,7 @@ namespace MetaDotaServer
                     (name: "myCors",
                         builde =>
                         {
-                            builde.WithOrigins("http://localhost:5069");
+                            builde.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
                         }
                     );
             });

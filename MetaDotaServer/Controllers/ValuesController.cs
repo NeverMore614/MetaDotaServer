@@ -5,6 +5,7 @@ using MetaDotaServer.Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors;
+using System.Text.Encodings.Web;
 namespace MetaDotaServer.Controllers
 {
     [Route("api/[controller]")]
@@ -21,23 +22,23 @@ namespace MetaDotaServer.Controllers
         }
 
         [HttpGet]
-        public string Get()
+        public string Get(string c)
         {
-            try
-            {
-                var options = new DbContextOptionsBuilder<UserContext>()
-.UseSqlServer(_configuration.GetConnectionString("UserContext") ?? throw new InvalidOperationException("Connection string 'UserContext' not found."))
-.Options;
-                UserContext userContext = new UserContext(options);
+//            try
+//            {
+//                var options = new DbContextOptionsBuilder<UserContext>()
+//.UseSqlServer(_configuration.GetConnectionString("UserContext") ?? throw new InvalidOperationException("Connection string 'UserContext' not found."))
+//.Options;
+//                UserContext userContext = new UserContext(options);
+//
+//                userContext.User.ToList();
+//            }
+//            catch (Exception ex)
+//            {
+//                return ex.Message;
+//            }
 
-                userContext.User.ToList();
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-
-            return "success";
+            return UrlEncoder.Default.Encode(c); ;
         }
     }
 }
