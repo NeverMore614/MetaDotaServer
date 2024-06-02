@@ -97,7 +97,7 @@ namespace MetaDotaServer.Controllers
             User user = await _contextFactory.GetUser(id);
             if (user == null)
             {
-                return false;
+                return NotFound();
             }
             if (state.Equals("success"))
             {
@@ -109,9 +109,9 @@ namespace MetaDotaServer.Controllers
             }
             if (!await _contextFactory.SaveUser(user))
             {
-                return false;
+                return Problem();
             }
-            return true;
+            return Ok(true);
         }
     }
 }
