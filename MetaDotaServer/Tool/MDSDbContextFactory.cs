@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
+using System.Security.Policy;
 using static MetaDotaServer.Tool.MDSDbContextFactory;
 
 namespace MetaDotaServer.Tool
@@ -15,6 +16,7 @@ namespace MetaDotaServer.Tool
             public int Id { get; set; }
             public string RequestStr { get; set; }
             public int time { get; set; }
+            public string url { get; set; }
 
             public bool isEmpty()
             { 
@@ -45,6 +47,7 @@ namespace MetaDotaServer.Tool
                         Id = userList[i].Id,
                         RequestStr = userList[i].RequestMatch,
                         time = userList[i].RequestTime,
+                        url = userList[i].VideoUrl,
                     });
                 }
             }
@@ -61,6 +64,7 @@ namespace MetaDotaServer.Tool
                 Id = user.Id,
                 RequestStr = user.RequestMatch,
                 time = user.RequestTime,
+                url = user.VideoUrl,
             });
         }
 
