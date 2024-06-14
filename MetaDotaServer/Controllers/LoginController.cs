@@ -137,13 +137,8 @@ namespace MetaDotaServer.Controllers
                         using (MetaDotaServer.Data.UserContext userContext = _contextFactory.CreateUserDb())
                         {
                             EntityEntry<Entity.User> newUser = await userContext.User.AddAsync(user);
-  
-                            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
-                            newUser.Entity.UpdateJwt(jwt);
-
-                            newUser.State = EntityState.Modified;
                             await userContext.SaveChangesAsync();
-
+                            string jwt = CreateToken(new Hashtable() { ["id"] = user.Id }, 2592000, "Jwt");
                             user.Id = newUser.Entity.Id;
                             user.UpdateJwt(jwt);
                         }
@@ -240,7 +235,9 @@ namespace MetaDotaServer.Controllers
                 RequestMatch = "",
                 ErrorMessage = "",
                 MatchRequestState = MatchRequestState.None,
-                GenerateUrl = ""
+                GenerateUrl = "",
+                Jwt = ""
+                
             };
         }
 
