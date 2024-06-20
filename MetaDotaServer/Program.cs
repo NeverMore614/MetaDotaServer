@@ -124,7 +124,7 @@ namespace MetaDotaServer
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseCors("myCors");
-
+            app.UseDisableOptionsRequests();
 
             app.UseAuthentication();
             app.UseAuthorization();
