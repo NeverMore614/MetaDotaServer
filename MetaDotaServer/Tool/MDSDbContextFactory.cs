@@ -34,13 +34,12 @@ namespace MetaDotaServer.Tool
         private readonly IConfiguration _configuration;
         public MDSDbContextFactory(IConfiguration configuration) {
             _configuration = configuration;
-
             _requestQueue = new Queue<MatchRequest>();
             var userList = GetUsers();
             userList.Sort((a, b) => { return a.RequestTime - b.RequestTime; });
             for (int i = 0; i < userList.Count; i++)
             {
-                if (userList[i].MatchRequestState == MatchRequestState.Waiting || userList[i].MatchRequestState == MatchRequestState.Generating)
+                if (userList[i].MatchRequestState == MatchRequestState.Waiting)
                 {
                     _requestQueue.Enqueue(new MatchRequest
                     {
