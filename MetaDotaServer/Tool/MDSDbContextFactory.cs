@@ -36,21 +36,21 @@ namespace MetaDotaServer.Tool
             _configuration = configuration;
 
             _requestQueue = new Queue<MatchRequest>();
-            //var userList = GetUsers();
-            //userList.Sort((a, b) => { return a.RequestTime - b.RequestTime; });
-            //for (int i = 0; i < userList.Count; i++)
-            //{
-            //    if (userList[i].MatchRequestState == MatchRequestState.Waiting || userList[i].MatchRequestState == MatchRequestState.Generating)
-            //    {
-            //        _requestQueue.Enqueue(new MatchRequest
-            //        {
-            //            Id = userList[i].Id,
-            //            RequestStr = userList[i].RequestMatch,
-            //            time = userList[i].RequestTime,
-            //            url = userList[i].VideoUrl,
-            //        });
-            //    }
-            //}
+            var userList = GetUsers();
+            userList.Sort((a, b) => { return a.RequestTime - b.RequestTime; });
+            for (int i = 0; i < userList.Count; i++)
+            {
+                if (userList[i].MatchRequestState == MatchRequestState.Waiting || userList[i].MatchRequestState == MatchRequestState.Generating)
+                {
+                    _requestQueue.Enqueue(new MatchRequest
+                    {
+                        Id = userList[i].Id,
+                        RequestStr = userList[i].RequestMatch,
+                        time = userList[i].RequestTime,
+                        url = userList[i].VideoUrl,
+                    });
+                }
+            }
             _instance = this;
         }
 
